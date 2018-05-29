@@ -1,35 +1,54 @@
 package com.mercadolibre.domain.service;
 
-import com.mercadolibre.domain.StatsResponse;
-import com.mercadolibre.domain.model.DnaSequence;
 import com.mercadolibre.domain.model.DnaMutantValue;
+import com.mercadolibre.domain.model.DnaSequence;
+import com.mercadolibre.domain.model.Stats;
+import com.mercadolibre.domain.repository.DnaSequenceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * Created by jesus.leon on 27/05/18.
  */
 @Service
-public class MutantService {
+public class DnaService {
+    private final DnaSequenceRepository dnaSequenceRepository;
+
+    @Autowired
+    public DnaService(DnaSequenceRepository dnaSequenceRepository) {
+        this.dnaSequenceRepository = dnaSequenceRepository;
+    }
+
     /**
      * Posts a mutant
      *
-     * @param dnaSequence
+     * @param dna
      * @return true if dnaSequence is a mutant, false in other case
      */
-    public boolean postMutant(DnaSequence dnaSequence) {
-        // TODO postear a bd la secuencia
-        boolean isMutant = isMutant(dnaSequence.getDna());
+    public DnaSequence postDna(String dna[]) {
+        boolean isMutant = isMutant(dna);
 
-        // TODO postear a bd las estadísticas
-        return isMutant;
+        DnaSequence dnaSequence = new DnaSequence(dna, isMutant);
+
+        dnaSequenceRepository.save(dnaSequence);
+
+        return dnaSequence;
     }
 
-    public StatsResponse stats() {
-        Long mutants = 5l;
-        Long humans = 10l;
-        Double ratio = new Double(mutants / humans);
+    public void deleteAll() {
+        dnaSequenceRepository.deleteAll();
+    }
 
-        return new StatsResponse(mutants, humans, ratio);
+    /**
+     * Returns stats about all dna
+     *
+     * @return StatsResponse showing dna's stats
+     */
+    public Stats stats() {
+        Long mutants = dnaSequenceRepository.countByMutant(true);
+        Long humans = dnaSequenceRepository.countByMutant(false);
+
+        return new Stats(mutants, humans);
     }
 
     private boolean isMutant(String[] dna) {

@@ -9,3 +9,7 @@ management:
   endpoints:
     web:
       base-path: /
+spring:
+  data:
+    mongodb:
+      database: xmen

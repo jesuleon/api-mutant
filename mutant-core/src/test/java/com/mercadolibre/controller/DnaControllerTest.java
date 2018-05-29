@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class MutantControllerTest extends ControllerTest {
+public class DnaControllerTest extends ControllerTest {
     @Test
     public void postMutantWithNxM() throws Exception {
         String[] dna = new String[] { "ATGCGA", "CAGTGC", "TTATGT", "AGAAGG", "CCCCTA" };
@@ -69,6 +69,15 @@ public class MutantControllerTest extends ControllerTest {
                 .contentType(contentType)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
+        ;
+    }
+
+    @Test
+    public void stats() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/stats")
+                .contentType(contentType)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
         ;
     }
 }

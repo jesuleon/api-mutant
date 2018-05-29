@@ -2,10 +2,9 @@ package com.mercadolibre.controller;
 
 import com.mercadolibre.domain.DnaRequest;
 import com.mercadolibre.domain.StatsResponse;
-import com.mercadolibre.domain.model.DnaSequence;
-import com.mercadolibre.domain.service.MutantService;
+import com.mercadolibre.domain.model.Stats;
+import com.mercadolibre.domain.service.DnaService;
 import com.mercadolibre.validator.DnaInRange;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,18 +21,18 @@ import javax.validation.Valid;
  */
 @RestController("/")
 @Validated
-public class MutantController {
-    private final MutantService mutantService;
+public class DnaController {
+    private final DnaService dnaService;
 
     @Autowired
-    public MutantController(MutantService mutantService) {
-        this.mutantService = mutantService;
+    public DnaController(DnaService dnaService) {
+        this.dnaService = dnaService;
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> postMutant(
+    public ResponseEntity<Boolean> postDna(
             @Valid @DnaInRange @RequestBody DnaRequest dnaRequest) {
-        if (mutantService.postMutant(transform(dnaRequest))) {
+        if (dnaService.postDna(dnaRequest.getDna()).isMutant()) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -42,14 +41,10 @@ public class MutantController {
 
     @GetMapping("/stats")
     public ResponseEntity<StatsResponse> stats() {
-        return ResponseEntity.ok(mutantService.stats());
+        return ResponseEntity.ok(transform(dnaService.stats()));
     }
 
-    private DnaSequence transform(DnaRequest dnaRequest) {
-        DnaSequence dnaSequence = new DnaSequence();
-
-        BeanUtils.copyProperties(dnaRequest, dnaSequence);
-
-        return dnaSequence;
+    private StatsResponse transform(Stats stats) {
+        return new StatsResponse(stats.getHumans(), stats.getMutants(), stats.getRatio());
     }
 }
